@@ -32,17 +32,6 @@ export type AIQuestionType = {
   temperature: number;
 };
 
-export const keyMapping = [
-  { key: 'keyLP', cases: ['learningPath'], generalPoints: 100 },
-  { key: 'codingKey', cases: ['VSCode'], generalPoints: 100 },
-  { key: 'collaborativeKey', cases: ['Eraser'], generalPoints: 100 },
-  { key: 'demo2024event', cases: ['PapyrusWeb'], generalPoints: 100 },
-  { key: 'knowledgeKey', cases: ['WebApp'], generalPoints: 100 },
-  { key: 'generalKey', cases: [], generalPoints: 100 },
-  { key: 'challenge45Aquila2025', cases: [], generalPoints: 100 },
-  { key: 'challenge23Aquila2025', cases: [], generalPoints: 100 },
-];
-
 export type layerType = {
   draworder: string;
   id: Number;

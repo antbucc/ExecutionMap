@@ -8,11 +8,18 @@ import { getQuest, levelUp } from '@workadventure/quests';
 import {
   AnalyticsActionBody,
   GradeAction,
-  keyMapping,
   Platform,
   ZoneId,
 } from './types/PolyglotFlow';
 import { LevelUpResponse } from '@workadventure/quests/dist/LevelUpResponse';
+import {
+  keyMapping,
+  manageExit,
+  managePrivateRoomsAccess,
+  managePrivateRoomsDisplay,
+  mappingActivity,
+  privateRooms,
+} from './mapping/mappingElements';
 //import { messagesPopup } from './components/userInteraction';
 
 console.log('Script started successfully');
@@ -66,16 +73,6 @@ function closeNarrative() {
   }
 }*/
 
-function displayDoorSudyRoom(state: boolean) {
-  if (state === true) {
-    WA.room.showLayer('door/studyRoomOpen');
-    WA.room.hideLayer('door/studyRoomClose');
-  } else {
-    WA.room.hideLayer('door/studyRoomOpen');
-    WA.room.showLayer('door/studyRoomClose');
-  }
-}
-
 function wrongAreaFunction(where: string, activity: string) {
   closePopup();
   wrongPopup = WA.ui.openPopup(
@@ -120,6 +117,7 @@ function wrongAreaFunction(where: string, activity: string) {
       height: 10, // Height size
   });
   */
+//points for player interaction
 //  const playerPos = await WA.player.getPosition();
 //  console.log(playerPos.y);
 //  const bannerPosition =
@@ -162,37 +160,6 @@ function wrongAreaFunction(where: string, activity: string) {
 //    },
 //  });
 //}
-
-const mappingActivity = [
-  {
-    platform: ['VSCode'],
-    pos: {
-      x: 11,
-      y: 19,
-    },
-  },
-  {
-    platform: ['WebApp'],
-    pos: {
-      x: 11,
-      y: 31,
-    },
-  },
-  {
-    platform: ['Eraser'],
-    pos: {
-      x: 38,
-      y: 31,
-    },
-  },
-  {
-    platform: ['PapyrusWeb'],
-    pos: {
-      x: 38,
-      y: 19,
-    },
-  },
-];
 
 let nextPos = { x: 0, y: 0 };
 
@@ -613,26 +580,9 @@ async function startActivity(flowId: string): Promise<any> {
 // Waiting for the API to be ready
 WA.onInit()
   .then(async () => {
+    WA.player.state.sectorName = 'EntryPoint';
     console.log('Scripting API ready');
-    // Flows Menu
-
-    displayDoorSudyRoom(WA.state.doorStudyRoom as boolean);
-    WA.state.onVariableChange('doorStudyRoom').subscribe((doorStudyRoom) => {
-      displayDoorSudyRoom(doorStudyRoom as boolean);
-    });
-
-    WA.room.onEnterLayer('doorsteps/studyRoomInsideStep').subscribe(() => {
-      console.log('inside');
-      WA.state.doorStudyRoom = !WA.state.doorStudyRoom;
-      console.log(WA.state.doorStudyRoom);
-    });
-
-    // When someone leaves the doorstep (inside the room), we remove the message
-    WA.room.onLeaveLayer('doorsteps/studyRoomOutsideStep').subscribe(() => {
-      console.log('outside');
-      WA.state.doorStudyRoom = !WA.state.doorStudyRoom;
-    });
-
+    privateRooms.map((rooms) => managePrivateRoomsDisplay(rooms.state));
     WA.room.website.create({
       name: 'logo',
       url: './images/solo_logo_32.png',
@@ -646,7 +596,7 @@ WA.onInit()
       origin: 'map',
       scale: 1,
     });
-    WA.player.playerId;
+    console.log('playerid:' + WA.player.playerId);
     WA.room.website.create({
       name: 'scritta',
       url: './images/solo_scritta_32.png',
@@ -660,6 +610,21 @@ WA.onInit()
       origin: 'map',
       scale: 1,
     });
+    //disable until rooms working
+    
+    /*WA.ui.website.open({
+      url: 'http://localhost:3000/gamifiedUI',
+      allowApi: true,
+      position: {
+        vertical: 'top',
+        horizontal: 'right',
+      },
+      size: {
+        height: 'auto',
+        width: 'min(300px, 90vw)',
+      },
+      visible: true,
+    });*/
     //narrativeMessage();
     WA.room.area.onLeave('Outside').subscribe(async () => {
       WA.room.showLayer('roof');
@@ -1284,11 +1249,90 @@ WA.onInit()
     });
 
     //studyRooms
+    //domanda da fare:
+    //?????????????????????????????????????????????????????????
+    //appesantisce tanto il runtime mettere un listener per ogni state?
+    //alternativa fare una variabile array string che contiene tutte gli stati
+    //WA.state.onVariableChange('studyRoomCodesState').subscribe((value) => {
+    //  managePrivateRoomsDisplay(value as string);
+    //});
+
+    WA.room.area.onEnter('StudyArea').subscribe(async () => {
+      try {
+        console.log('last sectorName Enter ' + WA.player.state.sectorName);
+        WA.player.state.sectorName = 'StudyArea';
+        console.log('new sectorName Enter ' + WA.player.state.sectorName);
+        return;
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    WA.room.area.onLeave('StudyArea').subscribe(async () => {
+      try {
+        console.log('studyarea leave');
+        WA.player.state.sectorName = 'other';
+        return;
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    //handler for access of players
+    //sbagliato ragiona nell'accesso null quando uno entra -> tramite UI cambia in un codice-> stateUpdate -> capire l'uscita
+    WA.state.onVariableChange('studyRoomState').subscribe(() => {
+      managePrivateRoomsDisplay('studyRoomState');
+    });
+    WA.state.onVariableChange('studyRoom2State').subscribe(() => {
+      managePrivateRoomsDisplay('studyRoom2State');
+    });
+    WA.state.onVariableChange('privateSession1State').subscribe(() => {
+      managePrivateRoomsDisplay('privateSession1State');
+    });
+    WA.state.onVariableChange('privateSession2State').subscribe(() => {
+      managePrivateRoomsDisplay('privateSession1State');
+    });
+    WA.state.onVariableChange('privateSession3State').subscribe(() => {
+      managePrivateRoomsDisplay('privateSession1State');
+    });
+    WA.state.onVariableChange('privateSession4State').subscribe(() => {
+      managePrivateRoomsDisplay('privateSession1State');
+    });
+    WA.state.onVariableChange('privateSession5State').subscribe(() => {
+      managePrivateRoomsDisplay('privateSession1State');
+    });
+    WA.state.onVariableChange('privateSession6State').subscribe(() => {
+      managePrivateRoomsDisplay('privateSession1State');
+    });
+
+    WA.player.state.onVariableChange('studyRoomCode').subscribe((value) => {
+      if (value == 'Error' || value == 'True') return;
+      if (value == 'Exit'){
+        console.log(WA.player.state.sectorName);
+        manageExit((WA.player.state.sectorName as string) || '');return}
+      managePrivateRoomsAccess(value as string);
+    });
 
     WA.room.area.onEnter('StudyRoom').subscribe(async () => {
       try {
-        const studyRoom = await WA.room.area.get('StudyRoom');
-        studyRoom.setProperty('code', '1111');
+        managePrivateRoomsDisplay('studyRoomState');
+        WA.player.state.sectorName = 'studyRoomState';
+        return;
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    WA.room.area.onLeave('StudyRoom').subscribe(async () => {
+      try {
+        WA.player.state.sectorName = 'StudyArea';
+        return;
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    WA.room.area.onEnter('privateSession1').subscribe(async () => {
+      try {
+        WA.player.state.sectorName = 'privateSession1State';
+        WA.player.state.studyRoomCode = WA.state.privateSession1State;
+        managePrivateRoomsDisplay('privateSession1State');
         return;
       } catch (error) {
         console.log(error);
@@ -1298,7 +1342,7 @@ WA.onInit()
     //back to entryPoint
     WA.room.area.onEnter('GoToEntryPoint').subscribe(() => {
       try {
-        WA.nav.goToRoom('#my-entry-point'); //addURL for EntryPoint
+        WA.nav.goToRoom('https://play.workadventu.re/@/fondazione-bruno-kessler/encore/entrypoint'); //addURL for EntryPoint
         return;
       } catch (error) {
         console.log(error);
