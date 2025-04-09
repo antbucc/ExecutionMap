@@ -7,10 +7,9 @@ import { ActionMessage } from '@workadventure/iframe-api-typings';
 import { getQuest, levelUp } from '@workadventure/quests';
 import {
   AnalyticsActionBody,
-  GradeAction,
   Platform,
   ZoneId,
-} from './types/PolyglotFlow';
+} from './types/AnalyticsActions';
 import { LevelUpResponse } from '@workadventure/quests/dist/LevelUpResponse';
 import {
   keyMapping,
@@ -398,10 +397,7 @@ function registerAnalyticsAction<T extends AnalyticsActionBody>(
 ): void {
   if ('actionType' in action) {
     switch (action.actionType) {
-      case 'gradeAction':
-        if (!('flow' in action.action && 'grade' in action.action)) {
-          throw new Error('Invalid GradeAction structure');
-        }
+      case 'completeLPAction':
         break;
       default:
         throw new Error(`Unknown actionType: ${action.actionType}`);
@@ -491,18 +487,15 @@ async function getActualActivity(playerPlatform: string) {
             WA.player.state.actualFlow == '6614ff6b-b7eb-423d-b896-ef994d9af097'
           )
             await levelUp(keyEvent, 100).catch((e) => console.log(e));*/
-          const action: GradeAction = {
+
+          registerAnalyticsAction({
             timestamp: new Date(),
-            userId: WA.player.name,
-            actionType: 'GradeAction',
+            userId: WA.player.playerId.toString(),
+            actionType: 'completeLPAction',
             zoneId: ZoneId.FreeZone,
             platform: Platform.WorkAdventure,
-            action: {
-              flow: 'test',
-              grade: 5,
-            },
-          };
-          registerAnalyticsAction(action);
+            action: undefined,
+          });
 
           WA.player.state.actualFlow = '';
           ctx = undefined;
@@ -611,7 +604,7 @@ WA.onInit()
       scale: 1,
     });
     //disable until rooms working
-    
+
     /*WA.ui.website.open({
       url: 'http://localhost:3000/gamifiedUI',
       allowApi: true,
@@ -1021,7 +1014,7 @@ WA.onInit()
         const URL =
           //@ts-ignore
           import.meta.env.VITE_WEBAPP_URL + '/tools/' + ctx;
-
+          
         closeWebsite();
         webSite = await WA.nav.openCoWebSite(URL, true);
         //open a timed popup to send the user to the right location
@@ -1305,9 +1298,11 @@ WA.onInit()
 
     WA.player.state.onVariableChange('studyRoomCode').subscribe((value) => {
       if (value == 'Error' || value == 'True') return;
-      if (value == 'Exit'){
+      if (value == 'Exit') {
         console.log(WA.player.state.sectorName);
-        manageExit((WA.player.state.sectorName as string) || '');return}
+        manageExit((WA.player.state.sectorName as string) || '');
+        return;
+      }
       managePrivateRoomsAccess(value as string);
     });
 
@@ -1342,7 +1337,9 @@ WA.onInit()
     //back to entryPoint
     WA.room.area.onEnter('GoToEntryPoint').subscribe(() => {
       try {
-        WA.nav.goToRoom('https://play.workadventu.re/@/fondazione-bruno-kessler/encore/entrypoint'); //addURL for EntryPoint
+        WA.nav.goToRoom(
+          'https://play.workadventu.re/@/fondazione-bruno-kessler/encore/entrypoint'
+        ); //addURL for EntryPoint
         return;
       } catch (error) {
         console.log(error);
