@@ -1,23 +1,22 @@
 export enum Platform {
-  PolyGloT,
-  VirtualStudio,
-  Papyrus,
-  WebApp,
-  WorkAdventure,
+  PolyGloT = 'PolyGloT',
+  VirtualStudio = 'VirtualStudio',
+  Papyrus = 'Papyrus',
+  WebApp = 'WebApp',
+  WorkAdventure = 'WorkAdventure',
 }
-
 export enum ZoneId {
-  FreeZone,
-  OutsideZone,
-  SilentZone,
-  LearningPathSelectionZone,
-  InstructionWebpageZone,
-  WebAppZone,
-  MeetingRoomZone,
-  PolyGlotLearningZone,
-  PolyGlotLearningPathCreationZone,
-  PapyrusWebZone,
-  VirtualStudioZone,
+  FreeZone = 'FreeZone',
+  OutsideZone = 'OutsideZone',
+  SilentZone = 'SilentZone',
+  LearningPathSelectionZone = 'LearningPathSelectionZone',
+  InstructionWebpageZone = 'InstructionWebpageZone',
+  WebAppZone = 'WebAppZone',
+  MeetingRoomZone = 'MeetingRoomZone',
+  PolyGlotLearningZone = 'PolyGlotLearningZone',
+  PolyGlotLearningPathCreationZone = 'PolyGlotLearningPathCreationZone',
+  PapyrusWebZone = 'PapyrusWebZone',
+  VirtualStudioZone = 'VirtualStudioZone',
 }
 
 //Action Body
