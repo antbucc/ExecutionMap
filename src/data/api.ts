@@ -1,5 +1,5 @@
 import axiosCreate, { AxiosResponse } from 'axios';
-import { AnalyticsActionBody } from '../types/PolyglotFlow';
+import { AnalyticsActionBody } from '../types/AnalyticsActions';
 
 export type UserFlowBody = {
   userId: string;

@@ -160,12 +160,11 @@ export function managePrivateRoomsAccess(code: string) {
 }
 
 export function manageExit(areaName: string) {
-  
   console.log('exit WA');
   const room = privateRooms.find(
     (room) => WA.state.loadVariable(room.state as string) == areaName
   );
-  console.log(room+"     "+ areaName)
+  console.log(room + '     ' + areaName);
   if (!room) {
     WA.player.state.studyRoomCode = 'Error';
     console.log('check error manage exit');
