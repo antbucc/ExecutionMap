@@ -13,11 +13,12 @@ export enum ZoneId {
   InstructionWebpageZone = 'InstructionWebpageZone',
   WebAppZone = 'WebAppZone',
   MeetingRoomZone = 'MeetingRoomZone',
-  PolyGlotLearningZone = 'PolyGlotLearningZone',
-  PolyGlotLearningPathCreationZone = 'PolyGlotLearningPathCreationZone',
+  PolyGloTLearningZone = 'PolyGloTLearningZone',
+  PolyGloTLearningPathCreationZone = 'PolyGloTLearningPathCreationZone',
   PapyrusWebZone = 'PapyrusWebZone',
   VirtualStudioZone = 'VirtualStudioZone',
 }
+
 
 //Action Body
 export type AnalyticsActionBody = {
