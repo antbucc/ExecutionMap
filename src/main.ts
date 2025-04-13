@@ -804,7 +804,7 @@ WA.onInit()
         closeWebsite();
         webSite = await WA.nav.openCoWebSite(
           //@ts-ignore
-          'http://localhost:3000' + '/flowMenu',
+          import.meta.env.VITE_WEBAPP_URL + '/flowMenu',
           true,
           undefined,
           55
@@ -919,7 +919,7 @@ WA.onInit()
             closeWebsite();
             webSite = await WA.nav.openCoWebSite(
               //@ts-ignore
-              'http://localhost:3000' +
+              import.meta.env.VITE_WEBAPP_URL +
                 '/flowShower/' +
                 WA.player.state.actualFlow,
               true,
@@ -957,7 +957,7 @@ WA.onInit()
             closeWebsite();
             webSite = await WA.nav.openCoWebSite(
               //@ts-ignore
-              'http://localhost:3000' +
+              import.meta.env.VITE_WEBAPP_URL +
                 '/flowShower/' +
                 WA.player.state.actualFlow,
               true,
@@ -1028,7 +1028,7 @@ WA.onInit()
         roadRun = false;
         const URL =
           //@ts-ignore
-          'http://localhost:3000' + '/tools/' + ctx;
+          import.meta.env.VITE_WEBAPP_URL + '/tools/' + ctx;
 
         closeWebsite();
         console.log(URL)
