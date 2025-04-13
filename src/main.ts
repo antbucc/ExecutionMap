@@ -93,6 +93,20 @@ function wrongAreaFunction(where: string, activity: string) {
   }, 3000);
 }
 
+function registerAnalyticsAction<T extends AnalyticsActionBody>(
+  action: T
+): void {
+  if ('actionType' in action) {
+    switch (action.actionType) {
+      case 'completeLPAction':
+        break;
+      default:
+        throw new Error(`Unknown actionType: ${action.actionType}`);
+    }
+  }
+  API.registerAction(action);
+}
+
 //async function narrativeMessage() {
 /*
     let tiledMap = await WA.room.getTiledMap();
@@ -291,30 +305,42 @@ async function nextActivityBannerV2(areaPopup: string) {
       }
     } while (again && i < 20);
 }
-/*
-let startingMeetingTime: Date;
 
-WA.player.proximityMeeting.onJoin().subscribe(async () => {
-  startingMeetingTime = new Date();
+let startingMeetingTime: Date | null = null;
+let usersId: string[] = [];
+
+WA.player.proximityMeeting.callbacks.push({
+  type: 'joinProximityMeetingEvent',
+  callback: ({ users }) => {
+    startingMeetingTime = new Date();
+    usersId = users.map((u) => u.playerId.toString());
+    console.log('Partecipanti al meeting:', usersId);
+  },
 });
 
 WA.player.proximityMeeting.onLeave().subscribe(async () => {
+  if (!startingMeetingTime) {
+    return;
+  }
   const endMeetingTime = new Date();
   const milliDiff: number =
     endMeetingTime.getTime() - startingMeetingTime.getTime();
-
-  const totalPoints = Math.floor(Math.floor(milliDiff / 1000) / 60) * 10;
-  const keyEvent =
-    WA.player.state.actualFlow == '6c7867a1-389e-4df6-b1d8-68250ee4cacb'
-      ? 'challenge45Aquila2025'
-      : 'challenge23Aquila2025';
-  if (
-    WA.player.state.actualFlow == '6c7867a1-389e-4df6-b1d8-68250ee4cacb' ||
-    WA.player.state.actualFlow == '6614ff6b-b7eb-423d-b896-ef994d9af097'
-  )
-    levelUp(keyEvent, totalPoints);
+  try {
+    registerAnalyticsAction({
+      timestamp: new Date(),
+      userId: WA.player.playerId.toString(),
+      actionType: 'privateMeetingAction',
+      zoneId: ZoneId.FreeZone,
+      platform: Platform.WorkAdventure,
+      action: { duration: milliDiff, users: usersId },
+    });
+  } catch (error) {
+    console.log(error)
+  }
+  usersId = [];
+  startingMeetingTime = null;
 });
-*/
+
 /*
 function debounce(func: (...args: any[]) => void, timeout = 2000) {
   let timer: ReturnType<typeof setTimeout>;
@@ -391,21 +417,6 @@ WA.player.onPlayerMove(async () => {
       }
     } while (again && i < 20);
 });
-
-function registerAnalyticsAction<T extends AnalyticsActionBody>(
-  action: T
-): void {
-  if ('actionType' in action) {
-    switch (action.actionType) {
-      case 'completeLPAction':
-        break;
-      default:
-        throw new Error(`Unknown actionType: ${action.actionType}`);
-    }
-  }
-  API.registerAction(action);
-}
-
 async function getActualActivity(playerPlatform: string) {
   //per mondo execution
   try {
@@ -487,16 +498,18 @@ async function getActualActivity(playerPlatform: string) {
             WA.player.state.actualFlow == '6614ff6b-b7eb-423d-b896-ef994d9af097'
           )
             await levelUp(keyEvent, 100).catch((e) => console.log(e));*/
-
+        try {
           registerAnalyticsAction({
-            timestamp: new Date(),
-            userId: WA.player.playerId.toString(),
-            actionType: 'completeLPAction',
-            zoneId: ZoneId.FreeZone,
-            platform: Platform.WorkAdventure,
-            action: undefined,
-          });
-
+                    timestamp: new Date(),
+                    userId: WA.player.playerId.toString(),
+                    actionType: 'completeLPAction',
+                    zoneId: ZoneId.FreeZone,
+                    platform: Platform.WorkAdventure,
+                    action: undefined,
+                  });
+        } catch (error) {
+          console.log(error)
+        }
           WA.player.state.actualFlow = '';
           ctx = undefined;
         }
@@ -526,7 +539,7 @@ async function getActualActivity(playerPlatform: string) {
   } catch (error: any) {
     // Handle network errors or other exceptions
     console.error('Error:', error);
-    throw error; // Rethrow the error for the caller to handle
+    throw error; 
   }
 }
 
@@ -573,6 +586,7 @@ async function startActivity(flowId: string): Promise<any> {
 // Waiting for the API to be ready
 WA.onInit()
   .then(async () => {
+    console.log(WA.player.state.actualFlow);
     WA.player.state.sectorName = 'EntryPoint';
     console.log('Scripting API ready');
     privateRooms.map((rooms) => managePrivateRoomsDisplay(rooms.state));
@@ -790,7 +804,7 @@ WA.onInit()
         closeWebsite();
         webSite = await WA.nav.openCoWebSite(
           //@ts-ignore
-          import.meta.env.VITE_WEBAPP_URL + '/flowMenu',
+          'http://localhost:3000' + '/flowMenu',
           true,
           undefined,
           55
@@ -905,7 +919,7 @@ WA.onInit()
             closeWebsite();
             webSite = await WA.nav.openCoWebSite(
               //@ts-ignore
-              import.meta.env.VITE_WEBAPP_URL +
+              'http://localhost:3000' +
                 '/flowShower/' +
                 WA.player.state.actualFlow,
               true,
@@ -943,7 +957,7 @@ WA.onInit()
             closeWebsite();
             webSite = await WA.nav.openCoWebSite(
               //@ts-ignore
-              import.meta.env.VITE_WEBAPP_URL +
+              'http://localhost:3000' +
                 '/flowShower/' +
                 WA.player.state.actualFlow,
               true,
@@ -968,6 +982,7 @@ WA.onInit()
     });
 
     WA.player.state.onVariableChange('actualFlow').subscribe(() => {
+      console.log(WA.player.state.actualFlow);
       if (WA.player.state.actualFlow == 'null') WA.state.door = false;
       closeWebsite();
       closeMenuPopup();
@@ -1013,9 +1028,10 @@ WA.onInit()
         roadRun = false;
         const URL =
           //@ts-ignore
-          import.meta.env.VITE_WEBAPP_URL + '/tools/' + ctx;
-          
+          'http://localhost:3000' + '/tools/' + ctx;
+
         closeWebsite();
+        console.log(URL)
         webSite = await WA.nav.openCoWebSite(URL, true);
         //open a timed popup to send the user to the right location
       } catch (error) {

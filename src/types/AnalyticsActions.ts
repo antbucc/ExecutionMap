@@ -19,7 +19,6 @@ export enum ZoneId {
   VirtualStudioZone = 'VirtualStudioZone',
 }
 
-
 //Action Body
 export type AnalyticsActionBody = {
   timestamp: Date;
