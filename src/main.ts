@@ -313,7 +313,7 @@ WA.player.proximityMeeting.callbacks.push({
   type: 'joinProximityMeetingEvent',
   callback: ({ users }) => {
     startingMeetingTime = new Date();
-    usersId = users.map((u) => u.playerId.toString());
+    usersId = users.map((u) => u.userUuid);
     console.log('Partecipanti al meeting:', usersId);
   },
 });
@@ -328,7 +328,7 @@ WA.player.proximityMeeting.onLeave().subscribe(async () => {
   try {
     registerAnalyticsAction({
       timestamp: new Date(),
-      userId: WA.player.playerId.toString(),
+      userId: WA.player.uuid||'guest',
       actionType: 'privateMeetingAction',
       zoneId: ZoneId.FreeZone,
       platform: Platform.WorkAdventure,
@@ -501,7 +501,7 @@ async function getActualActivity(playerPlatform: string) {
         try {
           registerAnalyticsAction({
                     timestamp: new Date(),
-                    userId: WA.player.playerId.toString(),
+                    userId: WA.player.uuid||'guest',
                     actionType: 'completeLPAction',
                     zoneId: ZoneId.FreeZone,
                     platform: Platform.WorkAdventure,
@@ -545,9 +545,11 @@ async function getActualActivity(playerPlatform: string) {
 
 async function startActivity(flowId: string): Promise<any> {
   try {
-    const username = WA.player.playerId.toString();
+    const username = WA.player.name;
+    const userId = WA.player.uuid || 'guest';
     const response: AxiosResponse = await API.startExecution({
       flowId,
+      userId,
       username,
     });
     // Handle error responses
@@ -603,7 +605,7 @@ WA.onInit()
       origin: 'map',
       scale: 1,
     });
-    console.log('playerid:' + WA.player.playerId);
+    console.log('userId:' + WA.player.uuid);
     WA.room.website.create({
       name: 'scritta',
       url: './images/solo_scritta_32.png',

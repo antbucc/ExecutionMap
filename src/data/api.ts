@@ -13,6 +13,7 @@ export type NextBody = {
 //the next 3 type are temporary, the next implementation will not use "ctxId", the APIs will use only the userId and the flowId
 export type FirstBody = {
   flowId: string;
+  userId?: string;
   username?: string;
 };
 export type CtxBody = { ctxId: string };
