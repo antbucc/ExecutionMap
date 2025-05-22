@@ -11,9 +11,16 @@ export const keyMapping = [
 
 export const mappingActivity = [
   {
-    platform: ['VSCode'],
+    platform: ['VSCode','CodingWebApp'],
     pos: {
       x: 11,
+      y: 19,
+    },
+  },
+  {
+    platform: ['Library'],
+    pos: {
+      x: 15,
       y: 19,
     },
   },

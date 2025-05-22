@@ -328,14 +328,14 @@ WA.player.proximityMeeting.onLeave().subscribe(async () => {
   try {
     registerAnalyticsAction({
       timestamp: new Date(),
-      userId: WA.player.uuid||'guest',
+      userId: WA.player.uuid || 'guest',
       actionType: 'privateMeetingAction',
       zoneId: ZoneId.FreeZone,
       platform: Platform.WorkAdventure,
       action: { duration: milliDiff, users: usersId },
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
   usersId = [];
   startingMeetingTime = null;
@@ -498,18 +498,18 @@ async function getActualActivity(playerPlatform: string) {
             WA.player.state.actualFlow == '6614ff6b-b7eb-423d-b896-ef994d9af097'
           )
             await levelUp(keyEvent, 100).catch((e) => console.log(e));*/
-        try {
-          registerAnalyticsAction({
-                    timestamp: new Date(),
-                    userId: WA.player.uuid||'guest',
-                    actionType: 'completeLPAction',
-                    zoneId: ZoneId.FreeZone,
-                    platform: Platform.WorkAdventure,
-                    action: undefined,
-                  });
-        } catch (error) {
-          console.log(error)
-        }
+          try {
+            registerAnalyticsAction({
+              timestamp: new Date(),
+              userId: WA.player.uuid || 'guest',
+              actionType: 'completeLPAction',
+              zoneId: ZoneId.FreeZone,
+              platform: Platform.WorkAdventure,
+              action: undefined,
+            });
+          } catch (error) {
+            console.log(error);
+          }
           WA.player.state.actualFlow = '';
           ctx = undefined;
         }
@@ -539,7 +539,7 @@ async function getActualActivity(playerPlatform: string) {
   } catch (error: any) {
     // Handle network errors or other exceptions
     console.error('Error:', error);
-    throw error; 
+    throw error;
   }
 }
 
@@ -605,7 +605,7 @@ WA.onInit()
       origin: 'map',
       scale: 1,
     });
-    console.log('userId:' + WA.player.uuid);
+    console.log('userId: ' + WA.player.uuid);
     WA.room.website.create({
       name: 'scritta',
       url: './images/solo_scritta_32.png',
@@ -620,6 +620,9 @@ WA.onInit()
       scale: 1,
     });
     //disable until rooms working
+
+    if (WA.player.uuid == '7487f275-0832-4040-8837-68e7a944b29c' || WA.player.name == 'antbucc')//vedi il nostro uuId-> cerca bucc      
+      WA.room.hideLayer('collision_manager_door');
 
     /*WA.ui.website.open({
       url: 'http://localhost:3000/gamifiedUI',
@@ -1015,11 +1018,39 @@ WA.onInit()
       if (value != 'WebApp') {
         closeWebsite();
         nextActivityBannerV2('BannerA1');
+      }if (value != 'Library') {
+        closeWebsite();
+        nextActivityBannerV2('BannerA1');
       }
       return;
     });
 
-    //per mondo execution
+    WA.room.area.onEnter('Library').subscribe(async () => {
+      try {
+        clearRoad();
+        roadRun = false;
+        if (actualActivity.platform != 'Library') {
+          wrongAreaFunction('BannerLibrary', 'Library');
+          return;
+        }
+        const URL =
+          //@ts-ignore
+          import.meta.env.VITE_WEBAPP_URL + '/library/' + ctx;
+
+        closeWebsite();
+        console.log(URL);
+        webSite = await WA.nav.openCoWebSite(URL, true);
+        //open a timed popup to send the user to the right location
+      } catch (error) {
+        // Handle errors if the API call fails
+      }
+    });
+
+    WA.room.area.onLeave('Library').subscribe(async () => {
+      closeWebsite();
+      nextActivityBannerV2('BannerLibrary');
+    });
+
     WA.room.area.onEnter('PolyGloTWebAppTool').subscribe(async () => {
       try {
         if (actualActivity.platform != 'WebApp') {
@@ -1033,7 +1064,7 @@ WA.onInit()
           import.meta.env.VITE_WEBAPP_URL + '/tools/' + ctx;
 
         closeWebsite();
-        console.log(URL)
+        console.log(URL);
         webSite = await WA.nav.openCoWebSite(URL, true);
         //open a timed popup to send the user to the right location
       } catch (error) {
@@ -1046,7 +1077,6 @@ WA.onInit()
       nextActivityBannerV2('BannerPolyGloTWebAppTool');
     });
 
-    //per mondo execution
     // generic tool space
     WA.room.area.onEnter('PapyrusWebTool').subscribe(async () => {
       // If you need to send data from the first call
@@ -1167,7 +1197,7 @@ WA.onInit()
     WA.room.area.onEnter('VSCodeTool').subscribe(async () => {
       // If you need to send data from the first call
       try {
-        if (actualActivity.platform != 'VSCode') {
+        if (actualActivity.platform != 'VSCode'&&actualActivity.platform != 'CodingWebApp') {
           wrongAreaFunction('BannerVSCodeTool', 'VSCode');
           return;
         }
@@ -1176,6 +1206,7 @@ WA.onInit()
         roadRun = false;
 
         closePopup();
+        if(actualActivity.platform == 'VSCode'){
         WA.ui.openPopup(
           'BannerVSCodeTool',
           'Your next activity is coding assessment. Click Open Notebook to open the notebook directly on your VSCode Editor',
@@ -1218,7 +1249,18 @@ WA.onInit()
               '_blank'
             );
           },
-        });
+        });}
+        if(actualActivity.platform == 'CodingWebApp')
+        {
+          
+        const URL =
+          //@ts-ignore
+          import.meta.env.VITE_WEBAPP_URL + '/coding/' + ctx;
+
+        closeWebsite();
+        console.log(URL);
+        webSite = await WA.nav.openCoWebSite(URL, true);
+        }
       } catch (error) {
         // Handle errors if the API call fails
         console.error('Failed to get API response:', error);
@@ -1226,6 +1268,7 @@ WA.onInit()
     });
 
     WA.room.area.onLeave('VSCodeTool').subscribe(async () => {
+      closeWebsite();
       nextActivityBannerV2('BannerVSCodeTool');
     });
 
