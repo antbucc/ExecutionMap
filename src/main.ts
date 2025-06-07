@@ -592,33 +592,8 @@ WA.onInit()
     WA.player.state.sectorName = 'EntryPoint';
     console.log('Scripting API ready');
     privateRooms.map((rooms) => managePrivateRoomsDisplay(rooms.state));
-    WA.room.website.create({
-      name: 'logo',
-      url: './images/solo_logo_32.png',
-      position: {
-        x: 606,
-        y: 1520,
-        width: 64,
-        height: 64,
-      },
-      visible: true,
-      origin: 'map',
-      scale: 1,
-    });
+    
     console.log('userId: ' + WA.player.uuid);
-    WA.room.website.create({
-      name: 'scritta',
-      url: './images/solo_scritta_32.png',
-      position: {
-        x: 960,
-        y: 1520,
-        width: 418,
-        height: 64,
-      },
-      visible: true,
-      origin: 'map',
-      scale: 1,
-    });
     //disable until rooms working
 
     if (WA.player.uuid == '7487f275-0832-4040-8837-68e7a944b29c' || WA.player.name == 'antbucc')//vedi il nostro uuId-> cerca bucc      
