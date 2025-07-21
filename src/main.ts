@@ -592,11 +592,15 @@ WA.onInit()
     WA.player.state.sectorName = 'EntryPoint';
     console.log('Scripting API ready');
     privateRooms.map((rooms) => managePrivateRoomsDisplay(rooms.state));
-    
+
     console.log('userId: ' + WA.player.uuid);
     //disable until rooms working
 
-    if (WA.player.uuid == '7487f275-0832-4040-8837-68e7a944b29c' || WA.player.name == 'antbucc')//vedi il nostro uuId-> cerca bucc      
+    if (
+      WA.player.uuid == '7487f275-0832-4040-8837-68e7a944b29c' ||
+      WA.player.name == 'antbucc'
+    )
+      //vedi il nostro uuId-> cerca bucc
       WA.room.hideLayer('collision_manager_door');
 
     /*WA.ui.website.open({
@@ -993,7 +997,8 @@ WA.onInit()
       if (value != 'WebApp') {
         closeWebsite();
         nextActivityBannerV2('BannerA1');
-      }if (value != 'Library') {
+      }
+      if (value != 'Library') {
         closeWebsite();
         nextActivityBannerV2('BannerA1');
       }
@@ -1172,7 +1177,10 @@ WA.onInit()
     WA.room.area.onEnter('VSCodeTool').subscribe(async () => {
       // If you need to send data from the first call
       try {
-        if (actualActivity.platform != 'VSCode'&&actualActivity.platform != 'CodingWebApp') {
+        if (
+          actualActivity.platform != 'VSCode' &&
+          actualActivity.platform != 'CodingWebApp'
+        ) {
           wrongAreaFunction('BannerVSCodeTool', 'VSCode');
           return;
         }
@@ -1181,60 +1189,59 @@ WA.onInit()
         roadRun = false;
 
         closePopup();
-        if(actualActivity.platform == 'VSCode'){
-        WA.ui.openPopup(
-          'BannerVSCodeTool',
-          'Your next activity is coding assessment. Click Open Notebook to open the notebook directly on your VSCode Editor',
-          [
-            {
-              label: 'Open Notebook',
-              className: 'normal',
-              callback: () => {
-                // Close the popup when the "Close" button is pressed.
-                WA.nav.openTab(
-                  'vscode://ms-dotnettools.dotnet-interactive-vscode/openNotebook?url=' + //@ts-ignore
-                    import.meta.env.VITE_BACK_URL +
-                    '/api/flows/' +
-                    ctx +
-                    '/run/notebook.dib'
-                );
+        if (actualActivity.platform == 'VSCode') {
+          WA.ui.openPopup(
+            'BannerVSCodeTool',
+            'Your next activity is coding assessment. Click Open Notebook to open the notebook directly on your VSCode Editor',
+            [
+              {
+                label: 'Open Notebook',
+                className: 'normal',
+                callback: () => {
+                  // Close the popup when the "Close" button is pressed.
+                  WA.nav.openTab(
+                    'vscode://ms-dotnettools.dotnet-interactive-vscode/openNotebook?url=' + //@ts-ignore
+                      import.meta.env.VITE_BACK_URL +
+                      '/api/flows/' +
+                      ctx +
+                      '/run/notebook.dib'
+                  );
+                },
               },
-            },
-            {
-              label: 'Close',
-              className: 'normal',
-              callback: (popup) => {
-                // Close the popup when the "Close" button is pressed.
-                popup.close();
+              {
+                label: 'Close',
+                className: 'normal',
+                callback: (popup) => {
+                  // Close the popup when the "Close" button is pressed.
+                  popup.close();
+                },
               },
+            ]
+          );
+
+          triggerMessage = WA.ui.displayActionMessage({
+            message:
+              "press 'space' or click here to open the instruction WebPage",
+            callback: async () => {
+              window.open(
+                'vscode://ms-dotnettools.dotnet-interactive-vscode/openNotebook?url=' + //@ts-ignore
+                  import.meta.env.VITE_BACK_URL +
+                  '/api/flows/' +
+                  ctx +
+                  '/run/notebook.dib',
+                '_blank'
+              );
             },
-          ]
-        );
+          });
+        }
+        if (actualActivity.platform == 'CodingWebApp') {
+          const URL =
+            //@ts-ignore
+            import.meta.env.VITE_WEBAPP_URL + '/coding/' + ctx;
 
-        triggerMessage = WA.ui.displayActionMessage({
-          message:
-            "press 'space' or click here to open the instruction WebPage",
-          callback: async () => {
-            window.open(
-              'vscode://ms-dotnettools.dotnet-interactive-vscode/openNotebook?url=' + //@ts-ignore
-                import.meta.env.VITE_BACK_URL +
-                '/api/flows/' +
-                ctx +
-                '/run/notebook.dib',
-              '_blank'
-            );
-          },
-        });}
-        if(actualActivity.platform == 'CodingWebApp')
-        {
-          
-        const URL =
-          //@ts-ignore
-          import.meta.env.VITE_WEBAPP_URL + '/coding/' + ctx;
-
-        closeWebsite();
-        console.log(URL);
-        webSite = await WA.nav.openCoWebSite(URL, true);
+          closeWebsite();
+          console.log(URL);
+          webSite = await WA.nav.openCoWebSite(URL, true);
         }
       } catch (error) {
         // Handle errors if the API call fails
@@ -1291,6 +1298,14 @@ WA.onInit()
         console.log('last sectorName Enter ' + WA.player.state.sectorName);
         WA.player.state.sectorName = 'StudyArea';
         console.log('new sectorName Enter ' + WA.player.state.sectorName);
+
+        const URL =
+          //@ts-ignore
+          import.meta.env.VITE_WEBAPP_URL + '/gym';
+
+        closeWebsite();
+        console.log(URL);
+        webSite = await WA.nav.openCoWebSite(URL, true);
         return;
       } catch (error) {
         console.log(error);
@@ -1298,6 +1313,7 @@ WA.onInit()
     });
     WA.room.area.onLeave('StudyArea').subscribe(async () => {
       try {
+        closeWebsite();
         console.log('studyarea leave');
         WA.player.state.sectorName = 'other';
         return;
