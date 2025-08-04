@@ -3,7 +3,7 @@
 import { bootstrapExtra } from '@workadventure/scripting-api-extra';
 import { AxiosResponse } from 'axios';
 import { API, PolyglotNodeValidation } from './data/api';
-import { ActionMessage } from '@workadventure/iframe-api-typings';
+import { ActionMessage, Popup } from '@workadventure/iframe-api-typings';
 import { getQuest, levelUp } from '@workadventure/quests';
 import {
   AnalyticsActionBody,
@@ -23,8 +23,7 @@ import {
 
 console.log('Script started successfully');
 
-let ctx: string | undefined; //to be remove after becoming obsolete, global ctx to keep tracks of this execution
-//let flow: string;
+let ctx: string | undefined;
 let actualActivity: PolyglotNodeValidation;
 let menuPopup: any;
 let webSite: any = undefined;
@@ -177,8 +176,6 @@ function registerAnalyticsAction<T extends AnalyticsActionBody>(
 let nextPos = { x: 0, y: 0 };
 
 function clearRoad() {
-  //refactor: si potrebbe fare in modo che al posto di cancellarli tutti cancella solo il primo creato (più vicino al player) e ne aggiunge uno in fondo
-  //=> codice più veloce e leggero in runtime
   let toCancel;
   do {
     toCancel = road.pop();
@@ -1295,17 +1292,47 @@ WA.onInit()
 
     WA.room.area.onEnter('StudyArea').subscribe(async () => {
       try {
-        console.log('last sectorName Enter ' + WA.player.state.sectorName);
         WA.player.state.sectorName = 'StudyArea';
-        console.log('new sectorName Enter ' + WA.player.state.sectorName);
+        const banner =
+          (await WA.player.getPosition()).x < 500
+            ? 'BannerGymTutor'
+            : 'BannerGymTutor2';
+        await banner;
+        instructionPopup = WA.ui.openPopup(
+          banner,
+          'Here, you can learn new concepts independently, train in our gym, or interact with the tutor.',
+          [
+            {
+              label: 'Gym training',
+              className: 'normal',
+              callback: async () => {
+                // Close the popup when the "Close" button is pressed.
+                closeInstruction();
+                const URL =
+                  //@ts-ignore
+                  import.meta.env.VITE_WEBAPP_URL + '/gym';
 
-        const URL =
-          //@ts-ignore
-          import.meta.env.VITE_WEBAPP_URL + '/gym';
+                closeWebsite();
+                console.log(URL);
+                webSite = await WA.nav.openCoWebSite(URL, true);
+              },
+            },
+            {
+              label: 'Tutor help',
+              className: 'normal',
+              callback: async () => {
+                // Close the popup when the "Close" button is pressed.
+                closeInstruction();
+                const URL = 'https://socratic-tutor-kth.up.railway.app/app';
 
-        closeWebsite();
-        console.log(URL);
-        webSite = await WA.nav.openCoWebSite(URL, true);
+                closeWebsite();
+                console.log(URL);
+                webSite = await WA.nav.openCoWebSite(URL, true);
+              },
+            },
+          ]
+        );
+        instructionPopup as Popup;
         return;
       } catch (error) {
         console.log(error);
@@ -1313,8 +1340,8 @@ WA.onInit()
     });
     WA.room.area.onLeave('StudyArea').subscribe(async () => {
       try {
+        closeInstruction();
         closeWebsite();
-        console.log('studyarea leave');
         WA.player.state.sectorName = 'other';
         return;
       } catch (error) {
